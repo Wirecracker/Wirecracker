@@ -18,6 +18,7 @@ import { FcGoogle } from 'react-icons/fc';
 import { ErrorProvider, useError } from './context/ErrorContext';
 import { WarningProvider, useWarning } from './context/WarningContext';
 import DBLookup from './pages/DatabaseLookup';
+import { BrainMapping } from './pages/BrainMappingConfig';
 
 const backendURL = __APP_CONFIG__.backendURL;
 
@@ -596,6 +597,17 @@ const HomePage = () => {
     }, []);
 
     useEffect(() => {
+        const handleAddFunctionalTestTab = (event) => {
+            addTab('brain-mapping-config', event.detail);
+        };
+
+        window.addEventListener('openBrainMappingConfig', handleAddFunctionalTestTab);
+        return () => {
+            window.removeEventListener('openBrainMappingConfig', handleAddFunctionalTestTab);
+        };
+    }, []);
+
+    useEffect(() => {
         // Find the highest localization number to initialize the counter
         if (tabs.length > 1) {
             const pattern = /Anatomy(\d+)/;
@@ -719,6 +731,9 @@ const HomePage = () => {
                 patientId = data?.state?.patientId ? data.state.patientId : data.patientId ? data.patientId : generatePatientId(); // Use existing patient_id from parent localization
                 break;
             case 'database-lookup':     title = 'Lookup'; break;
+            case 'brain-mapping-config':
+                title = 'Brain Mapping Config';                
+                break;
             default:
                 return null;
         }
@@ -1222,6 +1237,13 @@ const HomePage = () => {
                     onStateChange={(newState) => updateTabState(currentTab.id, newState)}
                     savedState={currentTab.state}
                 />;
+            case 'brain-mapping-config':
+                return <BrainMapping
+                    key={currentTab.id}
+                    initialData={{}}
+                    onStateChange={(newState) => updateTabState(currentTab.id, newState)}
+                    savedState={currentTab.state}
+                />;
             default:
                 return null;
         }
@@ -1429,6 +1451,16 @@ const Center = ({ token, onNewLocalization, onFileUpload, error, openSavedFile }
                         onClick={() => window.dispatchEvent(new CustomEvent('addDatabaseLookupTab'))}
                     >
                         Structure-Function-Test Lookup
+                    </button>
+                    {error && <p className="text-red-500 mt-2">{error}</p>}
+                    <button
+                        className="border-solid border border-sky-800 bg-sky-600 text-white font-semibold rounded-xl w-34 mt-3 py-1 text-xs align-middle transition-colors duration-200 cursor-pointer hover:bg-sky-800
+                                   md:w-40 md:text-sm
+                                   lg:w-48 lg:mt-4 lg:py-2 lg:text-md
+                                   xl:w-64 xl:mt-5 xl:py-3 xl:text-lg"
+                        onClick={() => window.dispatchEvent(new CustomEvent('openBrainMappingConfig'))}
+                    >
+                        Brain Config Mapping
                     </button>
                     {error && <p className="text-red-500 mt-2">{error}</p>}
 
