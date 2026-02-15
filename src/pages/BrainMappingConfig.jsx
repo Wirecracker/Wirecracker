@@ -19,6 +19,186 @@ import { Plus, Edit2, Trash2, Search } from "lucide-react";
 
 const backendURL = __APP_CONFIG__.backendURL;
 
+/* ---------- DATA ---------- */
+
+const initialMappings = [
+  {
+    id: "cort1",
+    name: "Left Temporal Cort",
+    description: "Left hemisphere temporal cortical region",
+    gms: [
+      {
+        id: "gm1",
+        name: "Language GM",
+        description: "Language network grey matter",
+        functions: [
+          {
+            id: "func1",
+            name: "Language Processing",
+            description: "Verbal language comprehension and production",
+            tests: [
+              {
+                id: "test1",
+                name: "Boston Naming Test",
+                description: "Confrontation naming ability",
+              },
+              {
+                id: "test2",
+                name: "Token Test",
+                description: "Auditory comprehension assessment",
+              },
+            ],
+          },
+          {
+            id: "func2",
+            name: "Semantic Retrieval",
+            description: "Word meaning and conceptual access",
+            tests: [
+              {
+                id: "test3",
+                name: "Category Fluency Test",
+                description: "Semantic word generation",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: "gm2",
+        name: "Verbal Memory GM",
+        description: "Encoding and recall grey matter network",
+        functions: [
+          {
+            id: "func3",
+            name: "Verbal Learning",
+            description: "Word list acquisition and recall",
+            tests: [
+              {
+                id: "test4",
+                name: "CVLT-II",
+                description: "California Verbal Learning Test",
+              },
+              {
+                id: "test5",
+                name: "Logical Memory",
+                description: "Narrative recall assessment",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: "cort2",
+    name: "Right Temporal Cort",
+    description: "Right hemisphere temporal cortical region",
+    gms: [
+      {
+        id: "gm3",
+        name: "Visual Memory GM",
+        description: "Non-verbal visual encoding and recall",
+        functions: [
+          {
+            id: "func4",
+            name: "Visual Recall",
+            description: "Retention of visual information",
+            tests: [
+              {
+                id: "test6",
+                name: "Rey Complex Figure Recall",
+                description: "Visual memory recall performance",
+              },
+              {
+                id: "test7",
+                name: "Benton Visual Retention",
+                description: "Short-term visual memory",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: "cort3",
+    name: "Frontal Cort",
+    description: "Executive and decision making cortex",
+    gms: [
+      {
+        id: "gm4",
+        name: "Executive Control GM",
+        description: "Planning and cognitive flexibility network",
+        functions: [
+          {
+            id: "func5",
+            name: "Cognitive Flexibility",
+            description: "Task switching and adaptability",
+            tests: [
+              {
+                id: "test8",
+                name: "Trail Making Test B",
+                description: "Executive switching ability",
+              },
+              {
+                id: "test9",
+                name: "Wisconsin Card Sorting Test",
+                description: "Set-shifting performance",
+              },
+            ],
+          },
+          {
+            id: "func6",
+            name: "Response Inhibition",
+            description: "Impulse and inhibition control",
+            tests: [
+              {
+                id: "test10",
+                name: "Stroop Color Word Test",
+                description: "Inhibitory control performance",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: "cort4",
+    name: "Parietal Cort",
+    description: "Spatial attention and sensory integration cortex",
+    gms: [
+      {
+        id: "gm5",
+        name: "Spatial Processing GM",
+        description: "Spatial orientation and attention network",
+        functions: [
+          {
+            id: "func7",
+            name: "Spatial Awareness",
+            description: "Environmental spatial perception",
+            tests: [
+              {
+                id: "test11",
+                name: "Line Bisection Test",
+                description: "Spatial neglect screening",
+              },
+              {
+                id: "test12",
+                name: "Clock Drawing Test",
+                description: "Visuospatial planning ability",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
 /* ---------- COMPONENT ---------- */
 
 export function BrainMapping() {
@@ -94,6 +274,7 @@ export function BrainMapping() {
       })
       .filter(Boolean);
   }, [query, mappings, searchScope]);
+  
 
   /* ---------- UI ---------- */
 
@@ -188,7 +369,7 @@ export function BrainMapping() {
       <Group justify="space-between">
         <Stack gap={2}>
           <Group>
-            <Text fw={600}>{capitalizeFirst(cort.cort_name)}</Text>
+            <Text fw={600}>{toTitleCase(cort.cort_name)}</Text>
             <Badge color="blue">CORT</Badge>
           </Group>
 
@@ -247,7 +428,7 @@ export function BrainMapping() {
                   <Group justify="space-between">
                     <Stack gap={2}>
                       <Group>
-                        <Text fw={500}>{capitalizeFirst(gm.gm_name)}</Text>
+                        <Text fw={500}>{toTitleCase(gm.gm_name)}</Text>
                         <Badge color="cyan">GM</Badge>
                       </Group>
 
@@ -303,7 +484,7 @@ export function BrainMapping() {
                             <Group justify="space-between">
                               <Stack gap={2}>
                                 <Group>
-                                  <Text fw={500}>{capitalizeFirst(func.function_name)}</Text>
+                                  <Text fw={500}>{toTitleCase(func.function_name)}</Text>
                                   <Badge color="green">Function</Badge>
                                 </Group>
 
@@ -346,6 +527,7 @@ export function BrainMapping() {
                             >
                               Add Test
                             </Button>
+
                             {/* TEST LIST */}
                             <Box pl="lg" style={{ maxWidth: "97%" }}>
                               {func.test?.map((test) => (
@@ -359,7 +541,7 @@ export function BrainMapping() {
                                   <Group justify="space-between">
                                     <Stack gap={2}>
                                       <Group>
-                                        <Text>{capitalizeFirst(test.test_name)}</Text>
+                                        <Text>{toTitleCase(test.test_name)}</Text>
                                         <Badge color="violet">Test</Badge>
                                       </Group>
 
