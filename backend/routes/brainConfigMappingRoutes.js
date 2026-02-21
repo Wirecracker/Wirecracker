@@ -12,9 +12,7 @@ router.get("/brain-mapping-config", async (req, res) => {
 
     /* ================= DATABASE QUERY ================= */
 
-    let dbQuery = supabase
-      .from("cort_gm_function_test_mapping_view")
-      .select(`
+    let dbQuery = supabase.from("cort_gm_function_test_mapping_view").select(`
         cort_id, cort_name, cort_acronym, cort_electrode_label, cort_hemisphere, cort_lobe,
 
         cort_gm_id, cort_gm_cort_id, cort_gm_gm_id, cort_gm_reference_id,
@@ -49,9 +47,7 @@ router.get("/brain-mapping-config", async (req, res) => {
     }
 
     if (lobe) {
-      const lobeArray = Array.isArray(lobe)
-        ? lobe
-        : lobe.split(",");
+      const lobeArray = Array.isArray(lobe) ? lobe : lobe.split(",");
       dbQuery = dbQuery.in("cort_lobe", lobeArray);
     }
 
@@ -61,14 +57,14 @@ router.get("/brain-mapping-config", async (req, res) => {
       console.error(error);
       return res.status(500).json({
         success: false,
-        error: "Database error occurred"
+        error: "Database error occurred",
       });
     }
 
     if (!data?.length) {
       return res.status(200).json({
         success: true,
-        data: []
+        data: [],
       });
     }
 
@@ -76,8 +72,7 @@ router.get("/brain-mapping-config", async (req, res) => {
 
     const cortMap = new Map();
 
-    data.forEach(row => {
-
+    data.forEach((row) => {
       /* ---------- CORT ---------- */
 
       if (!cortMap.has(row.cort_id)) {
@@ -89,7 +84,7 @@ router.get("/brain-mapping-config", async (req, res) => {
           cort_hemisphere: row.cort_hemisphere,
           cort_lobe: row.cort_lobe,
           gm: [],
-          gmMap: new Map()
+          gmMap: new Map(),
         });
       }
 
@@ -111,11 +106,11 @@ router.get("/brain-mapping-config", async (req, res) => {
             cort_gm_id: row.cort_gm_id,
             cort_gm_cort_id: row.cort_gm_cort_id,
             cort_gm_gm_id: row.cort_gm_gm_id,
-            cort_gm_reference_id: row.cort_gm_reference_id
+            cort_gm_reference_id: row.cort_gm_reference_id,
           },
 
           function: [],
-          funcMap: new Map()
+          funcMap: new Map(),
         };
 
         cort.gmMap.set(gmKey, gmObj);
@@ -138,11 +133,11 @@ router.get("/brain-mapping-config", async (req, res) => {
             gm_function_id: row.gm_function_id,
             gm_function_gm_id: row.gm_function_gm_id,
             gm_function_function_id: row.gm_function_function_id,
-            gm_function_reference_id: row.gm_function_reference_id
+            gm_function_reference_id: row.gm_function_reference_id,
           },
 
           test: [],
-          testMap: new Map()
+          testMap: new Map(),
         };
 
         gm.funcMap.set(funcKey, funcObj);
@@ -165,21 +160,20 @@ router.get("/brain-mapping-config", async (req, res) => {
             function_test_id: row.function_test_id,
             function_test_function_id: row.function_test_function_id,
             function_test_test_id: row.function_test_test_id,
-            function_test_reference_id: row.function_test_reference_id
-          }
+            function_test_reference_id: row.function_test_reference_id,
+          },
         };
 
         func.testMap.set(testKey, testObj);
         func.test.push(testObj);
       }
-
     });
 
     /* ================= CLEAN INTERNAL MAPS ================= */
 
-    const finalData = Array.from(cortMap.values()).map(cort => {
-      cort.gm.forEach(gm => {
-        gm.function.forEach(func => {
+    const finalData = Array.from(cortMap.values()).map((cort) => {
+      cort.gm.forEach((gm) => {
+        gm.function.forEach((func) => {
           delete func.testMap;
         });
         delete gm.funcMap;
@@ -192,15 +186,45 @@ router.get("/brain-mapping-config", async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: finalData
+      data: finalData,
     });
-
   } catch (err) {
     console.error(err);
 
     return res.status(500).json({
       success: false,
-      error: "Unexpected server error"
+      error: "Unexpected server error",
+    });
+  }
+});
+
+router.delete("/brain-mapping-config/:level/:id", async (req, res) => {
+  const { level, id } = req.params;
+
+  try {
+    const { data, error } = await supabase.rpc("delete_brain_mapping_branch", {
+      p_level: level,
+      p_id: parseInt(id),
+    });
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `${level} branch deleted successfully`,
+      details: data,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      error: "Delete operation failed",
     });
   }
 });

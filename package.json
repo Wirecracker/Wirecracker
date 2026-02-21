@@ -4,6 +4,7 @@
     "@mantine/core": "^8.3.14",
     "@mantine/hooks": "^8.3.14",
     "@mantine/modals": "^8.3.14",
+    "@mantine/notifications": "^8.3.14",
     "@supabase/supabase-js": "^2.48.1",
     "@tailwindcss/postcss": "^4.0.7",
     "@testing-library/jest-dom": "^6.6.3",
@@ -54,6 +55,7 @@
     "@vitest/ui": "^3.2.0",
     "esbuild": "^0.25.4",
     "fake-indexeddb": "^6.0.1",
+    "prettier": "^3.8.1",
     "tailwindcss": "^4.0.7"
   },
   "optionalDependencies": {

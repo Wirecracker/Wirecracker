@@ -17,234 +17,60 @@ import {
 
 import { Plus, Edit2, Trash2, Search } from "lucide-react";
 
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
+
 const backendURL = __APP_CONFIG__.backendURL;
-
-/* ---------- DATA ---------- */
-
-const initialMappings = [
-  {
-    id: "cort1",
-    name: "Left Temporal Cort",
-    description: "Left hemisphere temporal cortical region",
-    gms: [
-      {
-        id: "gm1",
-        name: "Language GM",
-        description: "Language network grey matter",
-        functions: [
-          {
-            id: "func1",
-            name: "Language Processing",
-            description: "Verbal language comprehension and production",
-            tests: [
-              {
-                id: "test1",
-                name: "Boston Naming Test",
-                description: "Confrontation naming ability",
-              },
-              {
-                id: "test2",
-                name: "Token Test",
-                description: "Auditory comprehension assessment",
-              },
-            ],
-          },
-          {
-            id: "func2",
-            name: "Semantic Retrieval",
-            description: "Word meaning and conceptual access",
-            tests: [
-              {
-                id: "test3",
-                name: "Category Fluency Test",
-                description: "Semantic word generation",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "gm2",
-        name: "Verbal Memory GM",
-        description: "Encoding and recall grey matter network",
-        functions: [
-          {
-            id: "func3",
-            name: "Verbal Learning",
-            description: "Word list acquisition and recall",
-            tests: [
-              {
-                id: "test4",
-                name: "CVLT-II",
-                description: "California Verbal Learning Test",
-              },
-              {
-                id: "test5",
-                name: "Logical Memory",
-                description: "Narrative recall assessment",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-
-  {
-    id: "cort2",
-    name: "Right Temporal Cort",
-    description: "Right hemisphere temporal cortical region",
-    gms: [
-      {
-        id: "gm3",
-        name: "Visual Memory GM",
-        description: "Non-verbal visual encoding and recall",
-        functions: [
-          {
-            id: "func4",
-            name: "Visual Recall",
-            description: "Retention of visual information",
-            tests: [
-              {
-                id: "test6",
-                name: "Rey Complex Figure Recall",
-                description: "Visual memory recall performance",
-              },
-              {
-                id: "test7",
-                name: "Benton Visual Retention",
-                description: "Short-term visual memory",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-
-  {
-    id: "cort3",
-    name: "Frontal Cort",
-    description: "Executive and decision making cortex",
-    gms: [
-      {
-        id: "gm4",
-        name: "Executive Control GM",
-        description: "Planning and cognitive flexibility network",
-        functions: [
-          {
-            id: "func5",
-            name: "Cognitive Flexibility",
-            description: "Task switching and adaptability",
-            tests: [
-              {
-                id: "test8",
-                name: "Trail Making Test B",
-                description: "Executive switching ability",
-              },
-              {
-                id: "test9",
-                name: "Wisconsin Card Sorting Test",
-                description: "Set-shifting performance",
-              },
-            ],
-          },
-          {
-            id: "func6",
-            name: "Response Inhibition",
-            description: "Impulse and inhibition control",
-            tests: [
-              {
-                id: "test10",
-                name: "Stroop Color Word Test",
-                description: "Inhibitory control performance",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-
-  {
-    id: "cort4",
-    name: "Parietal Cort",
-    description: "Spatial attention and sensory integration cortex",
-    gms: [
-      {
-        id: "gm5",
-        name: "Spatial Processing GM",
-        description: "Spatial orientation and attention network",
-        functions: [
-          {
-            id: "func7",
-            name: "Spatial Awareness",
-            description: "Environmental spatial perception",
-            tests: [
-              {
-                id: "test11",
-                name: "Line Bisection Test",
-                description: "Spatial neglect screening",
-              },
-              {
-                id: "test12",
-                name: "Clock Drawing Test",
-                description: "Visuospatial planning ability",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-];
 
 /* ---------- COMPONENT ---------- */
 
 export function BrainMapping() {
-  const [mappings] = useState(initialMappings);
   const [query, setQuery] = useState("");
   const [mappingData, setMappingData] = useState([]);
   const [searchScope, setSearchScope] = useState("all");
 
+  const [openCorts, setOpenCorts] = useState([]);
+  const [openGms, setOpenGms] = useState([]);
+  const [openFunctions, setOpenFunctions] = useState([]);
+
   /* ---------- SEARCH FILTER ---------- */
 
   const filteredMappings = useMemo(() => {
-    if (!query.trim()) return mappings;
+    if (!query.trim()) return mappingData;
 
     const q = query.toLowerCase();
 
-    return mappings
+    return mappingData
       .map((cort) => {
         const cortMatch =
           searchScope === "all" || searchScope === "cort"
-            ? cort.name.toLowerCase().includes(q)
+            ? cort.cort_name?.toLowerCase().includes(q)
             : false;
 
-        const filteredGMs = cort.gms
-          .map((gm) => {
+        const filteredGMs = cort.gm
+          ?.map((gm) => {
             const gmMatch =
               searchScope === "all" || searchScope === "gm"
-                ? gm.name.toLowerCase().includes(q)
+                ? gm.gm_name?.toLowerCase().includes(q)
                 : false;
 
-            const filteredFunctions = gm.functions
-              .map((func) => {
+            const filteredFunctions = gm.function
+              ?.map((func) => {
                 const funcMatch =
                   searchScope === "all" || searchScope === "function"
-                    ? func.name.toLowerCase().includes(q)
+                    ? func.function_name?.toLowerCase().includes(q)
                     : false;
 
-                const filteredTests = func.tests.filter((test) =>
+                const filteredTests = func.test?.filter((test) =>
                   searchScope === "all" || searchScope === "test"
-                    ? test.name.toLowerCase().includes(q)
-                    : false
+                    ? test.test_name?.toLowerCase().includes(q)
+                    : false,
                 );
 
-                if (funcMatch || filteredTests.length > 0) {
+                if (funcMatch || filteredTests?.length > 0) {
                   return {
                     ...func,
-                    tests: funcMatch ? func.tests : filteredTests,
+                    test: funcMatch ? func.test : filteredTests,
                   };
                 }
 
@@ -252,10 +78,10 @@ export function BrainMapping() {
               })
               .filter(Boolean);
 
-            if (gmMatch || filteredFunctions.length > 0) {
+            if (gmMatch || filteredFunctions?.length > 0) {
               return {
                 ...gm,
-                functions: gmMatch ? gm.functions : filteredFunctions,
+                function: gmMatch ? gm.function : filteredFunctions,
               };
             }
 
@@ -263,53 +89,159 @@ export function BrainMapping() {
           })
           .filter(Boolean);
 
-        if (cortMatch || filteredGMs.length > 0) {
+        if (cortMatch || filteredGMs?.length > 0) {
           return {
             ...cort,
-            gms: cortMatch ? cort.gms : filteredGMs,
+            gm: cortMatch ? cort.gm : filteredGMs,
           };
         }
 
         return null;
       })
       .filter(Boolean);
-  }, [query, mappings, searchScope]);
-  
+  }, [query, mappingData, searchScope]);
+
+  useEffect(() => {
+    if (!query.trim()) {
+      setOpenCorts([]);
+      setOpenGms([]);
+      setOpenFunctions([]);
+      return;
+    }
+
+    const cortIds = [];
+    const gmIds = [];
+    const funcIds = [];
+
+    filteredMappings.forEach((cort) => {
+      cortIds.push(String(cort.cort_id));
+
+      cort.gm?.forEach((gm) => {
+        gmIds.push(String(gm.gm_id));
+
+        gm.function?.forEach((func) => {
+          funcIds.push(String(func.function_id));
+        });
+      });
+    });
+
+    setOpenCorts(cortIds);
+    setOpenGms(gmIds);
+    setOpenFunctions(funcIds);
+  }, [query, filteredMappings]);
 
   /* ---------- UI ---------- */
 
   useEffect(() => {
-
-  const token = localStorage.getItem('token');
-  if (!token) {
-      showError('User not authenticated. Please log in to open epilepsy.');
+    const token = localStorage.getItem("token");
+    if (!token) {
+      showError("User not authenticated. Please log in to open epilepsy.");
       return;
-  }
+    }
 
     const response = fetch(`${backendURL}/api/brain-mapping-config`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
+        "Content-Type": "application/json",
+        Authorization: token,
       },
-  }).then(res => res.json())
-    .then(res => 
-    {
-      setMappingData(res.data);
     })
-    .catch(err => {
-      console.error('Error fetching brain mapping config:', err);
-      showError('Failed to load brain mapping configuration. Please try again later.');
-    });
+      .then((res) => res.json())
+      .then((res) => {
+        setMappingData(res.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching brain mapping config:", err);
+        showError(
+          "Failed to load brain mapping configuration. Please try again later.",
+        );
+      });
   }, []);
 
-  const toTitleCase = (str = "") =>
-  str
-    .replace(/_/g, " ")
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  const getLevelLabel = (level) => {
+    switch (level) {
+      case "cort":
+        return "Anatomical Marker";
+      case "gm":
+        return "Functional Area";
+      case "function":
+        return "Function";
+      case "test":
+        return "Test";
+      default:
+        return level;
+    }
+  };
 
+  const handleDelete = (level, id, name) => {
+    console.log("Modal Opened for:", level, id, name); // Debug log
+    modals.openConfirmModal({
+      title: `Delete ${toTitleCase(level)}`,
+      centered: true,
 
+      children: (
+        <>
+          <Text size="sm">You are about to delete:</Text>
+
+          <Text fw={600} mt={6}>
+            {name}
+          </Text>
+
+          <Text size="sm" c="red" mt="md">
+            ⚠ This will permanently remove this {getLevelLabel(level)} and all
+            associated mappings below it.
+          </Text>
+
+          <Text size="sm" c="red">
+            This action cannot be undone.
+          </Text>
+        </>
+      ),
+
+      labels: { confirm: "Delete", cancel: "Cancel" },
+
+      confirmProps: { color: "red" },
+
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem("token");
+
+          const res = await fetch(
+            `${backendURL}/api/brain-mapping-config/${level}/${id}`,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: token,
+              },
+            },
+          );
+
+          if (!res.ok) throw new Error();
+
+          notifications.show({
+            title: "Deleted",
+            message: `${name} removed successfully`,
+            color: "green",
+          });
+
+          // refresh data after delete
+          fetchMappings(); // 👈 call your fetch function
+        } catch (err) {
+          notifications.show({
+            title: "Error",
+            message: "Failed to delete item",
+            color: "red",
+          });
+        }
+      },
+    });
+  };
+
+  const toTitleCase = (str = "") => {
+    return str
+      .toLowerCase()
+      .replace(/(^|\s|-)\w/g, (match) => match.toUpperCase());
+  };
 
   return (
     <Container size="lg" py="xl">
@@ -330,8 +262,8 @@ export function BrainMapping() {
             onChange={setSearchScope}
             data={[
               { value: "all", label: "All" },
-              { value: "cort", label: "Cort" },
-              { value: "gm", label: "GM" },
+              { value: "cort", label: "Anatomical Marker" },
+              { value: "gm", label: "Functional Area" },
               { value: "function", label: "Function" },
               { value: "test", label: "Test" },
             ]}
@@ -339,14 +271,16 @@ export function BrainMapping() {
         </Group>
 
         {/* ADD CORT BUTTON */}
-        <Button leftSection={<Plus size={16} />} w={200}>
-          Add Cort
+        <Button leftSection={<Plus size={16} />} w={230}>
+          Add Anatomical Marker
         </Button>
 
         {/* MAIN TREE */}
         <Accordion
           variant="separated"
           multiple
+          value={openCorts}
+          onChange={setOpenCorts}
           styles={{
             control: {
               backgroundColor: "transparent",
@@ -362,192 +296,98 @@ export function BrainMapping() {
             },
           }}
         >
-          {mappingData?.map((cort) => (
-  <Accordion.Item key={cort.cort_id} value={String(cort.cort_id)}>
-    {/* CORT HEADER */}
-    <Accordion.Control>
-      <Group justify="space-between">
-        <Stack gap={2}>
-          <Group>
-            <Text fw={600}>{toTitleCase(cort.cort_name)}</Text>
-            <Badge color="blue">CORT</Badge>
-          </Group>
-
-          <Stack gap={0}>
-            <Text size="xs" c="dimmed">
-              Acronym: {cort.cort_acronym}
-            </Text>
-
-            <Text size="xs" c="dimmed">
-              Hemisphere: {cort.cort_hemisphere === "l" ? "Left" : "Right"}
-            </Text>
-
-            <Text size="xs" c="dimmed">
-              Lobe: {cort.cort_lobe}
-            </Text>
-
-            {cort.cort_electrode_label && (
-              <Text size="xs" c="dimmed">
-                Electrode: {cort.cort_electrode_label}
-              </Text>
-            )}
-          </Stack>
-        </Stack>
-
-        <Group>
-          <ActionIcon variant="light">
-            <Edit2 size={14} />
-          </ActionIcon>
-
-          <ActionIcon color="red" variant="light">
-            <Trash2 size={14} />
-          </ActionIcon>
-        </Group>
-      </Group>
-    </Accordion.Control>
-
-    {/* CORT PANEL */}
-    <Accordion.Panel>
-      <Stack>
-        <Button
-          size="xs"
-          variant="light"
-          color="cyan"
-          leftSection={<Plus size={14} />}
-          w="fit-content"
-        >
-          Add GM
-        </Button>
-
-        {/* GM ACCORDION */}
-        <Accordion multiple>
-          {cort.gm?.map((gm) => (
-            <Accordion.Item key={gm.gm_id} value={String(gm.gm_id)}>
+          {filteredMappings?.map((cort) => (
+            <Accordion.Item key={cort.cort_id} value={String(cort.cort_id)}>
+              {/* CORT HEADER */}
               <Accordion.Control>
-                <Card withBorder radius="md" bg="cyan.0">
-                  <Group justify="space-between">
-                    <Stack gap={2}>
-                      <Group>
-                        <Text fw={500}>{toTitleCase(gm.gm_name)}</Text>
-                        <Badge color="cyan">GM</Badge>
-                      </Group>
+                <Group justify="space-between">
+                  <Stack gap={2}>
+                    <Group>
+                      <Text fw={600}>{toTitleCase(cort.cort_name)}</Text>
+                      <Badge color="blue">Anatomical Marker</Badge>
+                    </Group>
 
-                      {gm.gm_acronym && (
-                        <Text size="sm" c="dimmed">
-                          Acronym: {gm.gm_acronym}
+                    <Stack gap={0}>
+                      <Text size="xs" c="dimmed">
+                        Acronym: {cort.cort_acronym}
+                      </Text>
+
+                      <Text size="xs" c="dimmed">
+                        Hemisphere:{" "}
+                        {cort.cort_hemisphere === "l" ? "Left" : "Right"}
+                      </Text>
+
+                      <Text size="xs" c="dimmed">
+                        Lobe: {cort.cort_lobe}
+                      </Text>
+
+                      {cort.cort_electrode_label && (
+                        <Text size="xs" c="dimmed">
+                          Electrode: {cort.cort_electrode_label}
                         </Text>
                       )}
                     </Stack>
+                  </Stack>
 
-                    <Group>
-                      <ActionIcon
-                        variant="light"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Edit2 size={14} />
-                      </ActionIcon>
+                  <Group>
+                    <ActionIcon variant="light">
+                      <Edit2 size={14} />
+                    </ActionIcon>
 
-                      <ActionIcon
-                        color="red"
-                        variant="light"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Trash2 size={14} />
-                      </ActionIcon>
-                    </Group>
+                    <ActionIcon
+                      color="red"
+                      variant="light"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete("cort", cort.cort_id, cort.cort_name);
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </ActionIcon>
                   </Group>
-                </Card>
+                </Group>
               </Accordion.Control>
 
-              {/* GM PANEL */}
+              {/* CORT PANEL */}
               <Accordion.Panel>
                 <Stack>
                   <Button
                     size="xs"
                     variant="light"
-                    color="green"
+                    color="cyan"
                     leftSection={<Plus size={14} />}
                     w="fit-content"
                   >
-                    Add Function
+                    Add Functional Area
                   </Button>
 
-                  {/* FUNCTION ACCORDION */}
-                  <Accordion multiple>
-                    {gm.function?.map((func) => (
-                      <Accordion.Item
-                        key={func.function_id}
-                        value={String(func.function_id)}
-                      >
-                        <Accordion.Control>
-                          <Card withBorder radius="md" bg="green.0">
-                            <Group justify="space-between">
-                              <Stack gap={2}>
-                                <Group>
-                                  <Text fw={500}>{toTitleCase(func.function_name)}</Text>
-                                  <Badge color="green">Function</Badge>
-                                </Group>
-
-                                {func.function_description && (
-                                  <Text size="sm" c="dimmed">
-                                    {func.function_description}
-                                  </Text>
-                                )}
-                              </Stack>
-
-                              <Group>
-                                <ActionIcon
-                                  variant="light"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Edit2 size={14} />
-                                </ActionIcon>
-
-                                <ActionIcon
-                                  color="red"
-                                  variant="light"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Trash2 size={14} />
-                                </ActionIcon>
-                              </Group>
-                            </Group>
-                          </Card>
-                        </Accordion.Control>
-
-                        {/* FUNCTION PANEL */}
-                        <Accordion.Panel>
-                          <Stack>
-                            <Button
-                              size="xs"
-                              variant="light"
-                              color="violet"
-                              leftSection={<Plus size={14} />}
-                              w="fit-content"
+                  {/* GM ACCORDION */}
+                  {cort.gm?.filter((g) => g.gm_id).length > 0 && (
+                    <Accordion multiple value={openGms} onChange={setOpenGms}>
+                      {cort.gm?.filter((gm) => gm.gm_id).length > 0 &&
+                        cort.gm
+                          .filter((gm) => gm.gm_id)
+                          .map((gm) => (
+                            <Accordion.Item
+                              key={gm.gm_id}
+                              value={String(gm.gm_id)}
                             >
-                              Add Test
-                            </Button>
-
-                            {/* TEST LIST */}
-                            <Box pl="lg" style={{ maxWidth: "97%" }}>
-                              {func.test?.map((test) => (
-                                <Card
-                                  key={test.test_id}
-                                  withBorder
-                                  radius="md"
-                                  bg="violet.0"
-                                  mb="sm"
-                                >
+                              <Accordion.Control>
+                                <Card withBorder radius="md" bg="cyan.0">
                                   <Group justify="space-between">
                                     <Stack gap={2}>
                                       <Group>
-                                        <Text>{toTitleCase(test.test_name)}</Text>
-                                        <Badge color="violet">Test</Badge>
+                                        <Text fw={500}>
+                                          {toTitleCase(gm.gm_name)}
+                                        </Text>
+                                        <Badge color="cyan">
+                                          Functional Area
+                                        </Badge>
                                       </Group>
 
-                                      {test.test_description && (
+                                      {gm.gm_acronym && (
                                         <Text size="sm" c="dimmed">
-                                          {test.test_description}
+                                          Acronym: {gm.gm_acronym}
                                         </Text>
                                       )}
                                     </Stack>
@@ -563,30 +403,225 @@ export function BrainMapping() {
                                       <ActionIcon
                                         color="red"
                                         variant="light"
-                                        onClick={(e) => e.stopPropagation()}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDelete(
+                                            "gm",
+                                            gm.gm_id,
+                                            gm.gm_name,
+                                          );
+                                        }}
                                       >
                                         <Trash2 size={14} />
                                       </ActionIcon>
                                     </Group>
                                   </Group>
                                 </Card>
-                              ))}
-                            </Box>
-                          </Stack>
-                        </Accordion.Panel>
-                      </Accordion.Item>
-                    ))}
-                  </Accordion>
+                              </Accordion.Control>
+
+                              {/* GM PANEL */}
+                              <Accordion.Panel>
+                                <Stack>
+                                  <Button
+                                    size="xs"
+                                    variant="light"
+                                    color="green"
+                                    leftSection={<Plus size={14} />}
+                                    w="fit-content"
+                                  >
+                                    Add Function
+                                  </Button>
+
+                                  {/* FUNCTION ACCORDION */}
+                                  {gm.function?.filter((f) => f.function_id)
+                                    .length > 0 && (
+                                    <Accordion
+                                      multiple
+                                      value={openFunctions}
+                                      onChange={setOpenFunctions}
+                                    >
+                                      {gm.function?.filter((f) => f.function_id)
+                                        .length > 0 &&
+                                        gm.function
+                                          .filter((f) => f.function_id)
+                                          .map((func) => (
+                                            <Accordion.Item
+                                              key={func.function_id}
+                                              value={String(func.function_id)}
+                                            >
+                                              <Accordion.Control>
+                                                <Card
+                                                  withBorder
+                                                  radius="md"
+                                                  bg="green.0"
+                                                >
+                                                  <Group justify="space-between">
+                                                    <Stack gap={2}>
+                                                      <Group>
+                                                        <Text fw={500}>
+                                                          {toTitleCase(
+                                                            func.function_name,
+                                                          )}
+                                                        </Text>
+                                                        <Badge color="green">
+                                                          Function
+                                                        </Badge>
+                                                      </Group>
+
+                                                      {func.function_description && (
+                                                        <Text
+                                                          size="sm"
+                                                          c="dimmed"
+                                                        >
+                                                          {
+                                                            func.function_description
+                                                          }
+                                                        </Text>
+                                                      )}
+                                                    </Stack>
+
+                                                    <Group>
+                                                      <ActionIcon
+                                                        variant="light"
+                                                        onClick={(e) =>
+                                                          e.stopPropagation()
+                                                        }
+                                                      >
+                                                        <Edit2 size={14} />
+                                                      </ActionIcon>
+
+                                                      <ActionIcon
+                                                        color="red"
+                                                        variant="light"
+                                                        onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          handleDelete(
+                                                            "function",
+                                                            func.function_id,
+                                                            func.function_name,
+                                                          );
+                                                        }}
+                                                      >
+                                                        <Trash2 size={14} />
+                                                      </ActionIcon>
+                                                    </Group>
+                                                  </Group>
+                                                </Card>
+                                              </Accordion.Control>
+
+                                              {/* FUNCTION PANEL */}
+                                              <Accordion.Panel>
+                                                <Stack>
+                                                  <Button
+                                                    size="xs"
+                                                    variant="light"
+                                                    color="violet"
+                                                    leftSection={
+                                                      <Plus size={14} />
+                                                    }
+                                                    w="fit-content"
+                                                  >
+                                                    Add Test
+                                                  </Button>
+
+                                                  {/* TEST LIST */}
+                                                  <Box
+                                                    pl="lg"
+                                                    style={{ maxWidth: "97%" }}
+                                                  >
+                                                    {func.test?.filter(
+                                                      (t) => t.test_id,
+                                                    ).length > 0 &&
+                                                      func.test
+                                                        .filter(
+                                                          (t) => t.test_id,
+                                                        )
+                                                        .map((test) => (
+                                                          <Card
+                                                            key={test.test_id}
+                                                            withBorder
+                                                            radius="md"
+                                                            bg="violet.0"
+                                                            mb="sm"
+                                                          >
+                                                            <Group justify="space-between">
+                                                              <Stack gap={2}>
+                                                                <Group>
+                                                                  <Text>
+                                                                    {toTitleCase(
+                                                                      test.test_name,
+                                                                    )}
+                                                                  </Text>
+                                                                  <Badge color="violet">
+                                                                    Test
+                                                                  </Badge>
+                                                                </Group>
+
+                                                                {test.test_description && (
+                                                                  <Text
+                                                                    size="sm"
+                                                                    c="dimmed"
+                                                                  >
+                                                                    {
+                                                                      test.test_description
+                                                                    }
+                                                                  </Text>
+                                                                )}
+                                                              </Stack>
+
+                                                              <Group>
+                                                                <ActionIcon
+                                                                  variant="light"
+                                                                  onClick={(
+                                                                    e,
+                                                                  ) =>
+                                                                    e.stopPropagation()
+                                                                  }
+                                                                >
+                                                                  <Edit2
+                                                                    size={14}
+                                                                  />
+                                                                </ActionIcon>
+
+                                                                <ActionIcon
+                                                                  color="red"
+                                                                  variant="light"
+                                                                  onClick={(
+                                                                    e,
+                                                                  ) => {
+                                                                    e.stopPropagation();
+                                                                    handleDelete(
+                                                                      "test",
+                                                                      test.test_id,
+                                                                      test.test_name,
+                                                                    );
+                                                                  }}
+                                                                >
+                                                                  <Trash2
+                                                                    size={14}
+                                                                  />
+                                                                </ActionIcon>
+                                                              </Group>
+                                                            </Group>
+                                                          </Card>
+                                                        ))}
+                                                  </Box>
+                                                </Stack>
+                                              </Accordion.Panel>
+                                            </Accordion.Item>
+                                          ))}
+                                    </Accordion>
+                                  )}
+                                </Stack>
+                              </Accordion.Panel>
+                            </Accordion.Item>
+                          ))}
+                    </Accordion>
+                  )}
                 </Stack>
               </Accordion.Panel>
             </Accordion.Item>
           ))}
-        </Accordion>
-      </Stack>
-    </Accordion.Panel>
-  </Accordion.Item>
-))}
-
         </Accordion>
       </Stack>
     </Container>
