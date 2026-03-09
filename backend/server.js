@@ -13,7 +13,7 @@ const app = express();
 
 const config = process.env.NODE_ENV === "development" ? devConfig : prodConfig;
 
-const PORT = config.PORT || 5000;
+const PORT = config.port || config.PORT || 5000;
 const frontendURL = config.frontendURL;
 const backendURL = config.backendURL;
 
@@ -22,7 +22,7 @@ app.use(
   cors({
     origin: frontendURL, // Your frontend URL
     credentials: true, // Allow credentials
-    methods: ["GET", "POST", "DELETE"], // Allowed methods
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"], // Allowed methods
     allowedHeaders: ["Content-Type", "Authorization"],
     exposedHeaders: ["set-cookie"],
   }),
