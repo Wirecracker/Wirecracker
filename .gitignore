@@ -4,3 +4,5 @@ node_modules/
 src/utils/Nifti_viewer/ExampleData/
 src/utils/Nifti_viewer/ExampleData.zip
 coverage/
+
+dist/
